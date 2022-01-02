@@ -1,7 +1,12 @@
+// const dash = require('appmetrics-dash');
+
+// // 监控前端性能
+// dash.monitor({
+// 	url: '/monitor',
+// 	port: 3335,
+// });
+
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const https = require('https');
 
 const app = express();
 const chalk = require('chalk');
@@ -10,20 +15,11 @@ const sessionParser = require('express-session');
 const config = require('./config/config');
 const controller = require('./controller/index');
 const LogMiddleware = require('./middleware/LogMiddleware');
-// require('./schedule');
-
-// 开启ssl证书
-const privateKey = fs.readFileSync(path.join(__dirname, './ssl/5784044_r0jd8.cn.key'), 'utf8');
-const certificate = fs.readFileSync(path.join(__dirname, './ssl/5784044_r0jd8.cn.pem'), 'utf8');
-
-const credentials = {
-	// pfx: pfx, //微信商户平台证书,
-	key: privateKey,
-	cert: certificate,
-};
+const loginMiddleware = require('./middleware/loginMiddleware');
+require('./schedule');
 
 // 解析cookie和session还有body
-app.use(cookieParser()); // 挂载中间件，可以理解为实例化
+app.use(cookieParser(config.cookieSign)); // 挂载中间件，可以理解为实例化
 
 app.use(
 	sessionParser({
@@ -66,17 +62,11 @@ app.all('*', (req, res, next) => {
 	next();
 });
 
+// 判断用户是否登录
+// app.use(loginMiddleware);
+
 // 路由 controller层
 controller(app);
-
-const httpsServer = https.createServer(credentials, app);
-
-if (config.env !== 'dev') {
-	// 启动服务器，监听对应的端口
-	httpsServer.listen(443, () => {
-		console.log(chalk.yellow(`env: ${config.env}, server is listenning 443`));
-	});
-}
 
 // 监听8888端口
 app.listen(config.port, () => {

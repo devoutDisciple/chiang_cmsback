@@ -24,7 +24,7 @@ module.exports = (sequelize) => {
       comment: "评论的id"
     },
     img_urls: {
-      type: Sequelize.STRING(600),
+      type: Sequelize.STRING(3000),
       allowNull: true,
       defaultValue: "[]",
       comment: "图片的urls"

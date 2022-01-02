@@ -28,7 +28,7 @@ commentRecordModal.belongsTo(userModal, { foreignKey: 'user_id', targetKey: 'id'
 
 const timeformat = 'YYYY-MM-DD HH:mm';
 
-const handleComment = async (comments, user_id) => {
+const handleComment = async (comments) => {
 	if (!Array.isArray(comments)) return {};
 	let len = comments.length;
 	while (len > 0) {
@@ -49,11 +49,6 @@ const handleComment = async (comments, user_id) => {
 			}
 		}
 		item.img_urls = imgUrls;
-		// 查询是否点过赞
-		if (item && item.id && user_id) {
-			const goodsDetail = await goodsRecordModal.findOne({ where: { user_id, comment_id: item.id, type: 2 } });
-			if (goodsDetail) item.hadGoods = true;
-		}
 	}
 	const result = responseUtil.renderFieldsAll(comments, [
 		'id',
@@ -98,10 +93,12 @@ module.exports = {
 		}
 		// vote
 		if (obj.type === 3) {
+			const voteFields = ['id', 'title', 'total', 'type', 'content'];
 			obj.voteDetail = await voteModal.findOne({
 				where: { id: obj.other_id },
+				attributes: voteFields,
 			});
-			obj.voteDetail = responseUtil.renderFieldsObj(obj.voteDetail, ['id', 'title', 'total', 'type', 'content']);
+			obj.voteDetail = responseUtil.renderFieldsObj(obj.voteDetail, voteFields);
 			obj.voteDetail.content = JSON.parse(obj.voteDetail.content) || [];
 			// 查看用户是否已经选择了某个
 			if (user_id && obj.id) {
@@ -116,17 +113,7 @@ module.exports = {
 		}
 		// battle
 		if (obj.type === 4) {
-			// 查看battle详情
-			obj.battleDetail = await battleModal.findOne({
-				where: { id: obj.other_id },
-			});
-			const dead_time = obj.battleDetail.dead_time;
-			obj.battleDetail.expire = false;
-			// 已经过期
-			if (!moment(dead_time).isAfter(moment(new Date()))) {
-				obj.battleDetail.expire = true;
-			}
-			obj.battleDetail = responseUtil.renderFieldsObj(obj.battleDetail, [
+			const battleFields = [
 				'id',
 				'title',
 				'red_name',
@@ -135,8 +122,21 @@ module.exports = {
 				'blue_name',
 				'blue_ticket',
 				'blue_url',
+				'type',
 				'dead_time',
-			]);
+			];
+			// 查看battle详情
+			obj.battleDetail = await battleModal.findOne({
+				where: { id: obj.other_id },
+				attributes: battleFields,
+			});
+			const dead_time = obj.battleDetail.dead_time;
+			obj.battleDetail.expire = false;
+			// 已经过期
+			if (!moment(dead_time).isAfter(moment(new Date()))) {
+				obj.battleDetail.expire = true;
+			}
+			obj.battleDetail = responseUtil.renderFieldsObj(obj.battleDetail, battleFields);
 			obj.battleDetail.red_url = JSON.parse(obj.battleDetail.red_url) || {};
 			obj.battleDetail.red_url.url = config.preUrl.battleUrl + obj.battleDetail.red_url.url;
 			obj.battleDetail.blue_url = JSON.parse(obj.battleDetail.blue_url) || {};
@@ -161,11 +161,12 @@ module.exports = {
 		}
 		// video
 		if (obj.type === 5) {
+			const videoFields = ['id', 'url', 'desc', 'photo', 'width', 'height', 'duration', 'size'];
 			obj.videoDetail = await videoModal.findOne({
 				where: { id: obj.other_id },
-				attributes: ['id', 'url', 'desc', 'photo', 'width', 'height'],
+				attributes: videoFields,
 			});
-			obj.videoDetail = responseUtil.renderFieldsObj(obj.videoDetail, ['id', 'url', 'desc', 'photo', 'width', 'height']);
+			obj.videoDetail = responseUtil.renderFieldsObj(obj.videoDetail, videoFields);
 			if (obj.videoDetail && obj.videoDetail.url) obj.videoDetail.url = config.preUrl.videoUrl + obj.videoDetail.url;
 			if (obj.videoDetail && obj.videoDetail.photo) {
 				const photo = JSON.parse(obj.videoDetail.photo);
@@ -202,7 +203,7 @@ module.exports = {
 	handleComment,
 	// 获取热门回复， 点赞量最多的
 	getHotReply: async (content_id, user_id) => {
-		const comments = await commentRecordModal.findAll({
+		const comments = await commentRecordModal.findOne({
 			where: {
 				content_id,
 				type: 1, // 给帖子的评论
@@ -223,8 +224,8 @@ module.exports = {
 			limit: 1,
 			offset: 0,
 		});
-		if (!comments || comments.length === 0) return {};
-		const result = await handleComment(comments, user_id);
+		if (!comments) return {};
+		const result = await handleComment([comments], user_id);
 		return result[0] || {};
 	},
 };

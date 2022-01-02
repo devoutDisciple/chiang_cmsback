@@ -1,18 +1,13 @@
 const moment = require('moment');
 const sizeOf = require('image-size');
 const sequelize = require('../dataSource/MysqlPoolClass');
-const config = require('../config/config');
 const content = require('../models/content');
 const battle = require('../models/battle');
-const user = require('../models/user');
-const circle = require('../models/circle');
 const battleRecord = require('../models/battle_record');
 const resultMessage = require('../util/resultMessage');
 const { handleContent } = require('../util/commonService');
 
 const contentModal = content(sequelize);
-const userModal = user(sequelize);
-const circleModal = circle(sequelize);
 const battleModal = battle(sequelize);
 const battleRecordModal = battleRecord(sequelize);
 const timeformat = 'YYYY-MM-DD HH:mm:ss';
@@ -49,7 +44,7 @@ module.exports = {
 			});
 			await contentModal.create({
 				user_id,
-				circle_ids: circle_ids ? circle_ids.join(',') : '',
+				circle_ids: circle_ids ? JSON.parse(circle_ids).join(',') : '',
 				circle_names: circle_names ? JSON.stringify(circle_names) : '[]',
 				other_id: battleDetail.id,
 				type: 4,
@@ -57,14 +52,6 @@ module.exports = {
 				update_time: moment().format(timeformat),
 			});
 			res.send(resultMessage.success('success'));
-			// 用户积分 + 2, 发布 + 1
-			userModal.increment({ integral: config.PUBLISH_POSTS_INTEGRAL, publish: 1 }, { where: { id: user_id } });
-			// 圈子热度 + 2
-			if (circle_ids && Array.isArray(circle_ids)) {
-				circle_ids.forEach((circle_id) => {
-					circleModal.increment({ hot: config.PUBLISH_POSTS_INTEGRAL }, { where: { id: circle_id } });
-				});
-			}
 		} catch (error) {
 			console.log(error);
 			res.send(resultMessage.error());
@@ -126,6 +113,7 @@ module.exports = {
 					create_time: moment().format(timeformat),
 				});
 			}
+
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);

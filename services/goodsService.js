@@ -1,23 +1,19 @@
 const Sequelize = require('sequelize');
 const moment = require('moment');
-const userUtil = require('../util/userUtil');
 const sequelize = require('../dataSource/MysqlPoolClass');
 const resultMessage = require('../util/resultMessage');
 const goodsRecord = require('../models/goods_record');
 const commentRecord = require('../models/comment_record');
-const user = require('../models/user');
 const content = require('../models/content');
 const config = require('../config/config');
 
 const Op = Sequelize.Op;
 const goodsRecordModal = goodsRecord(sequelize);
 const commentRecordModal = commentRecord(sequelize);
-const userModal = user(sequelize);
 const contentModal = content(sequelize);
 const timeformat = 'YYYY-MM-DD HH:mm:ss';
 goodsRecordModal.belongsTo(contentModal, { foreignKey: 'content_id', targetKey: 'id', as: 'contentDetail' });
 goodsRecordModal.belongsTo(commentRecordModal, { foreignKey: 'comment_id', targetKey: 'id', as: 'commentDetail' });
-goodsRecordModal.belongsTo(userModal, { foreignKey: 'user_id', targetKey: 'id', as: 'userDetail' });
 commentRecordModal.belongsTo(contentModal, { foreignKey: 'content_id', targetKey: 'id', as: 'contentDetail' });
 commentRecordModal.belongsTo(commentRecordModal, { foreignKey: 'comment_id', targetKey: 'id', as: 'commentDetail' });
 
@@ -26,10 +22,10 @@ const responseUtil = require('../util/responseUtil');
 
 const pagesize = 10;
 module.exports = {
-	// 给帖子点赞
-	addPostsGoods: async (req, res) => {
+	// 查看所有评论
+	getAllByContentId: async (req, res) => {
 		try {
-			const { user_id, other_id, content_id, goods_type } = req.body;
+			const { user_id, content_id, goods_type } = req.body;
 			const goodsDetail = await goodsRecordModal.findOne({
 				where: {
 					user_id,
@@ -43,7 +39,6 @@ module.exports = {
 			} else {
 				goodsRecordModal.create({
 					user_id,
-					other_id,
 					content_id,
 					type: 1,
 					create_time: moment().format(timeformat),
@@ -51,14 +46,10 @@ module.exports = {
 			}
 			if (goods_type) {
 				// 给帖子增加赞 热度 + 1
-				contentModal.increment({ goods: config.GOODS_INTEGRAL, hot: config.GOODS_INTEGRAL }, { where: { id: content_id } });
-				// 用户点赞，积分 + 1
-				userModal.increment({ goods: config.GOODS_INTEGRAL, integral: config.GOODS_INTEGRAL }, { where: { id: user_id } });
+				contentModal.increment(['goods', 'hot'], { where: { id: content_id } });
 			} else {
 				// 给帖子取消赞 热度 - 1
-				contentModal.decrement({ goods: config.GOODS_INTEGRAL, hot: config.GOODS_INTEGRAL }, { where: { id: content_id } });
-				// 用户点赞，积分 - 1
-				userModal.decrement({ goods: config.GOODS_INTEGRAL, integral: config.GOODS_INTEGRAL }, { where: { id: user_id } });
+				contentModal.decrement(['goods', 'hot'], { where: { id: content_id } });
 			}
 			res.send(resultMessage.success('success'));
 		} catch (error) {
@@ -70,10 +61,9 @@ module.exports = {
 	// 给评论点赞
 	addReplyGoods: async (req, res) => {
 		try {
-			const { user_id, other_id, content_id, comment_id, goods_type, type } = req.body;
+			const { user_id, content_id, comment_id, goods_type, type } = req.body;
 			const conditions = {
 				user_id,
-				other_id,
 				content_id,
 				type,
 			};
@@ -92,18 +82,14 @@ module.exports = {
 			}
 			if (goods_type) {
 				// 评论的点赞 + 1
-				commentRecordModal.increment({ goods: config.GOODS_INTEGRAL }, { where: { id: comment_id } });
+				commentRecordModal.increment('goods', { where: { id: comment_id } });
 				// 帖子热度 + 1
-				contentModal.increment({ hot: config.GOODS_INTEGRAL }, { where: { id: content_id } });
-				// 用户点赞数量 + 1
-				userModal.increment({ goods: config.GOODS_INTEGRAL, integral: config.GOODS_INTEGRAL }, { where: { id: user_id } });
+				contentModal.increment(['hot'], { where: { id: content_id } });
 			} else {
 				// 评论的点赞 + 1
-				commentRecordModal.decrement({ goods: config.GOODS_INTEGRAL }, { where: { id: comment_id } });
+				commentRecordModal.decrement('goods', { where: { id: comment_id } });
 				// 帖子热度 - 1
-				contentModal.decrement({ hot: config.GOODS_INTEGRAL }, { where: { id: content_id } });
-				// 用户点赞数量 - 1
-				userModal.decrement({ goods: config.GOODS_INTEGRAL, integral: config.GOODS_INTEGRAL }, { where: { id: user_id } });
+				contentModal.decrement(['hot'], { where: { id: content_id } });
 			}
 			res.send(resultMessage.success('success'));
 		} catch (error) {
@@ -132,16 +118,45 @@ module.exports = {
 			const { user_id, time } = req.query;
 			if (!user_id || !time) return res.send(resultMessage.error('请先登录'));
 			// 查看我发布的帖子获得了多少赞
-			let goodsNum = await goodsRecordModal.count({
+			const contentGoodsNum = await goodsRecordModal.count({
 				where: {
 					type: 1,
-					other_id: user_id,
 					create_time: {
 						[Op.gte]: time,
 					},
 				},
+				include: [
+					{
+						model: contentModal,
+						as: 'contentDetail',
+						attributes: ['id', 'user_id'],
+						where: {
+							user_id,
+						},
+					},
+				],
 			});
-			goodsNum = Number(goodsNum).toFixed(0);
+			// 查看我的评论获得了多少赞
+			const commentsGoodsNum = await goodsRecordModal.count({
+				where: {
+					type: [2, 3],
+					create_time: {
+						[Op.gte]: time,
+					},
+				},
+				include: [
+					{
+						model: commentRecordModal,
+						as: 'commentDetail',
+						attributes: ['id', 'user_id', 'content_id'],
+						where: {
+							user_id,
+						},
+					},
+				],
+			});
+			const goodsNum = Number(contentGoodsNum + commentsGoodsNum).toFixed(0) || 0;
+			// const commentsNum = Number(contentsComNum + commentsComNum).toFixed(0);
 			res.send(resultMessage.success({ goodsNum }));
 		} catch (error) {
 			console.log(error);
@@ -186,7 +201,9 @@ module.exports = {
 						model: commentRecordModal,
 						as: 'commentDetail',
 						attributes: ['id', 'user_id', 'content_id'],
-						where: { user_id },
+						where: {
+							user_id,
+						},
 					},
 				],
 			});
@@ -198,10 +215,10 @@ module.exports = {
 		}
 	},
 
-	// 分页获取用户点赞的内容的详情
+	// 分页获取用户获得的赞的详情
 	getGoodsDetailByUser: async (req, res) => {
 		try {
-			const goodsFields = ['id', 'user_id', 'other_id', 'type', 'content_id', 'comment_id', 'create_time'];
+			const goodsFields = ['id', 'type', 'content_id', 'comment_id', 'create_time'];
 			const { user_id, current = 1 } = req.query;
 			const offset = Number((current - 1) * pagesize);
 			// 赞
@@ -236,109 +253,6 @@ module.exports = {
 						} else {
 							currItem.contentType = curContent.type;
 							curContent = responseUtil.renderFieldsObj(curContent, ['id', 'type', 'other_id']);
-							const newContent = await handleContent(curContent);
-							if (newContent.type === 1) {
-								currItem.title = '帖子';
-								currItem.desc = newContent.postsDetail.title || '暂无描述信息';
-							}
-							if (newContent.type === 2) {
-								currItem.title = '博客';
-								currItem.desc = newContent.postsDetail.desc || '暂无描述信息';
-							}
-							if (newContent.type === 3) {
-								currItem.title = '投票';
-								currItem.desc = newContent.voteDetail.desc || '暂无描述信息';
-							}
-							if (newContent.type === 4) {
-								currItem.title = 'PK';
-								currItem.desc = newContent.battleDetail.title || '暂无描述信息';
-							}
-							if (newContent.type === 5) {
-								currItem.title = '视频';
-								currItem.desc = newContent.videoDetail.desc || '暂无描述信息';
-							}
-						}
-					} else {
-						const curComment = await commentRecordModal.findOne({
-							where: {
-								id: currItem.comment_id,
-							},
-							attributes: ['id', 'type', 'desc', 'img_urls'],
-						});
-						if (!curComment) {
-							currItem.hasContent = false;
-							currItem.desc = '该内容已删除';
-						} else {
-							currItem.contentType = '-1';
-							currItem.title = '评论';
-							currItem.desc = curComment.desc || '暂无描述信息';
-						}
-					}
-					currItem.hadGoods = true;
-					result.push(currItem);
-				}
-			}
-			res.send(resultMessage.success(result));
-		} catch (error) {
-			console.log(error);
-			res.send(resultMessage.error());
-		}
-	},
-
-	// 分页获取用户被点赞的内容详情
-	getGoodsDetailByOther: async (req, res) => {
-		try {
-			const goodsFields = ['id', 'user_id', 'other_id', 'type', 'content_id', 'comment_id', 'create_time'];
-			const { user_id, current = 1 } = req.query;
-			const offset = Number((current - 1) * pagesize);
-			// 赞
-			const goods = await goodsRecordModal.findAll({
-				where: {
-					other_id: user_id,
-				},
-				include: [
-					{
-						model: userModal,
-						as: 'userDetail',
-						attributes: ['id', 'username', 'photo', 'integral'],
-					},
-				],
-				attributes: goodsFields,
-				order: [['create_time', 'DESC']],
-				limit: pagesize,
-				offset,
-			});
-			const result = [];
-			if (goods && goods.length !== 0) {
-				let len = goods.length;
-				while (len > 0) {
-					len -= 1;
-					const currItem = responseUtil.renderFieldsObj(goods[len], goodsFields);
-					currItem.userDetail = responseUtil.renderFieldsObj(goods[len].userDetail || {}, [
-						'id',
-						'username',
-						'photo',
-						'integral',
-					]);
-					if (currItem.userDetail) {
-						currItem.userDetail.photo = userUtil.getPhotoUrl(currItem.userDetail.photo);
-					}
-					currItem.create_time = moment(currItem.create_time).format('YYYY-MM-DD HH:mm');
-					// type: 1-帖子赞 2-评论赞 3-评论的评论的赞
-					if (currItem.type === 1) {
-						let curContent = await contentModal.findOne({
-							where: {
-								id: currItem.content_id,
-							},
-							attributes: ['id', 'type', 'other_id', 'user_id'],
-						});
-						currItem.hasContent = true;
-						if (!curContent) {
-							currItem.desc = '该内容已删除';
-							currItem.hasContent = false;
-						} else {
-							currItem.contentType = curContent.type;
-							curContent = responseUtil.renderFieldsObj(curContent, ['id', 'type', 'user_id', 'other_id']);
 							const newContent = await handleContent(curContent);
 							if (newContent.type === 1) {
 								currItem.title = '帖子';

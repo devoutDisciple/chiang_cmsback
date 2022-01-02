@@ -11,7 +11,7 @@ circleModal.hasMany(topicModal, { foreignKey: 'circle_id', targetKey: 'id', as: 
 
 module.exports = {
 	// 根据圈子id获取话题
-	getByCircleId: async (req, res) => {
+	getAllByCircleId: async (req, res) => {
 		try {
 			const { circle_id } = req.query;
 			const topics = await topicModal.findAll({
@@ -26,43 +26,24 @@ module.exports = {
 		}
 	},
 
-	// 根据圈子id获取话题
-	getByCircleIds: async (req, res) => {
+	// 删除话题
+	deleteTopicById: async (req, res) => {
 		try {
-			let { circleIds } = req.query;
-			circleIds = JSON.parse(circleIds) || [];
-			const circleList = await circleModal.findAll({
-				where: { id: circleIds, is_delete: 1 },
-				include: [
-					{
-						model: topicModal,
-						as: 'topics',
-					},
-				],
-			});
-			const result = [];
-			if (circleList && circleList.length !== 0) {
-				circleList.forEach((cir) => {
-					const obj = {
-						circle_id: cir.id,
-						circle_name: cir.name,
-					};
-					const topics = cir.topics || [];
-					if (topics && topics.length !== 0) {
-						obj.topics = [];
-						topics.forEach((tp) => {
-							obj.topics.push({
-								topic_id: tp.id,
-								topic_name: tp.name,
-								selected: false,
-							});
-						});
-					}
-					result.push(obj);
-				});
-			}
+			const { topicId } = req.body;
+			await topicModal.destroy({ where: { id: topicId } });
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			res.send(resultMessage.error());
+		}
+	},
 
-			res.send(resultMessage.success(result));
+	// 新增话题
+	addTopic: async (req, res) => {
+		try {
+			const { topicName, circleId } = req.body;
+			await topicModal.create({ circle_id: circleId, name: topicName });
+			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);
 			res.send(resultMessage.error());

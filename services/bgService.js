@@ -20,13 +20,12 @@ module.exports = {
 	},
 
 	// 获取所有默认背景图
-	getDefalutBgImg: async (req, res) => {
+	getAllDefaultBg: async (req, res) => {
 		try {
 			const bgs = await bgImgModal.findAll({ order: [['sort', 'DESC']] });
 			const result = [];
 			bgs.forEach((item) => {
-				const imgUrl = JSON.parse(item.url);
-				result.push(imgUrl);
+				result.push(item.url);
 			});
 			res.send(resultMessage.success(result));
 		} catch (error) {
@@ -61,8 +60,6 @@ module.exports = {
 				},
 			);
 			res.send(resultMessage.success(config.preUrl.bgUrl + filename));
-			// 用户积分 + 1
-			userModal.increment({ integral: config.CHANGE_BG_INTEGRAL }, { where: { id: user_id } });
 		} catch (error) {
 			console.log(error);
 			res.send(resultMessage.error());

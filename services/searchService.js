@@ -265,7 +265,7 @@ module.exports = {
 					{
 						model: videoModal,
 						as: 'videoDetail',
-						attributes: ['id', 'url', 'desc', 'photo', 'width', 'height'],
+						attributes: ['id', 'url', 'desc', 'photo'],
 						where: {
 							desc: {
 								[Op.like]: `%${keywords}%`,

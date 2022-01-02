@@ -24,10 +24,6 @@ module.exports = {
 						other_id,
 					},
 				});
-				// 用户的关注 - 1
-				userModal.decrement({ fellow: 1 }, { where: { id: user_id } });
-				// 被关注的粉丝 - 1
-				userModal.decrement({ fans: 1 }, { where: { id: other_id } });
 			} else {
 				// 创建新的关注
 				userAttentionModal.create({
@@ -35,10 +31,6 @@ module.exports = {
 					other_id,
 					create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 				});
-				// 用户的关注 + 1
-				userModal.increment({ fellow: 1 }, { where: { id: user_id } });
-				// 被关注的粉丝 + 1
-				userModal.increment({ fans: 1 }, { where: { id: other_id } });
 			}
 			res.send(resultMessage.success('success'));
 		} catch (error) {
@@ -70,6 +62,21 @@ module.exports = {
 				}
 			});
 			res.send(resultMessage.success(result));
+		} catch (error) {
+			console.log(error);
+			res.send(resultMessage.error());
+		}
+	},
+
+	// 获取关注用户的数量
+	getMyAttentionUsersNum: async (req, res) => {
+		try {
+			const { user_id } = req.query;
+			const num = await userAttentionModal.count({
+				where: { user_id, is_delete: 1 },
+			});
+
+			res.send(resultMessage.success({ num }));
 		} catch (error) {
 			console.log(error);
 			res.send(resultMessage.error());

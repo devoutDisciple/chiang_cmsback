@@ -23,29 +23,28 @@ module.exports = {
 					if (!userDetail && !avatarUrl && !nickName) {
 						await userModal.create({
 							wx_openid: openid,
-							create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 						});
 					}
 					// 直接登录，获得了用户基本信息
 					if (!userDetail && avatarUrl && nickName) {
 						await userModal.create({
 							wx_openid: openid,
-							username: '',
-							photo: '',
+							username: nickName,
+							photo: avatarUrl,
 							create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 						});
 						userDetail = {
 							wx_openid: openid,
-							username: '',
-							photo: '',
+							username: nickName,
+							photo: avatarUrl,
 						};
 					}
 					// 有了用户openid，却没用用户基本信息
-					if (userDetail && avatarUrl && nickName && (userDetail.photo === 'photo.png' || !userDetail.photo)) {
+					if (userDetail && avatarUrl && nickName) {
 						await userModal.update(
 							{
-								username: '',
-								photo: '',
+								username: nickName,
+								photo: avatarUrl,
 							},
 							{
 								where: {
@@ -55,8 +54,8 @@ module.exports = {
 						);
 						userDetail = {
 							wx_openid: openid,
-							username: '',
-							photo: '',
+							username: nickName,
+							photo: avatarUrl,
 						};
 					}
 					let userResult = await userModal.findOne({ where: { wx_openid: openid } });

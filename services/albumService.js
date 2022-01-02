@@ -2,12 +2,10 @@ const moment = require('moment');
 const sizeOf = require('image-size');
 const sequelize = require('../dataSource/MysqlPoolClass');
 const album = require('../models/album');
-const user = require('../models/user');
 const config = require('../config/config');
 const resultMessage = require('../util/resultMessage');
 const responseUtil = require('../util/responseUtil');
 
-const userModal = user(sequelize);
 const albumModal = album(sequelize);
 const timeformat = 'YYYY-MM-DD HH:mm:ss';
 
@@ -23,8 +21,6 @@ module.exports = {
 				create_time: moment().format(timeformat),
 			});
 			res.send(resultMessage.success({ url: filename, width, height }));
-			// 用户积分 + 1
-			userModal.increment({ integral: config.PHOTO_INTEGRAL }, { where: { id: user_id } });
 		} catch (error) {
 			console.log(error);
 			res.send(resultMessage.error());
