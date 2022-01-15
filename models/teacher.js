@@ -1,31 +1,32 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('posts', {
+  return sequelize.define('teacher', {
     id: {
       autoIncrement: true,
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    title: {
+    name: {
+      type: Sequelize.STRING(255),
+      allowNull: true
+    },
+    photo: {
       type: Sequelize.STRING(255),
       allowNull: true,
-      comment: "标题"
+      defaultValue: "photo.png",
+      comment: "头像"
     },
-    desc: {
-      type: Sequelize.STRING(3000),
+    is_delete: {
+      type: Sequelize.INTEGER,
       allowNull: true,
-      comment: "内容"
-    },
-    img_urls: {
-      type: Sequelize.STRING(3000),
-      allowNull: true,
-      comment: "图片链接"
+      defaultValue: 1,
+      comment: "1-存在 2-删除"
     }
   }, {
     sequelize,
-    tableName: 'posts',
+    tableName: 'teacher',
     timestamps: false,
     indexes: [
       {

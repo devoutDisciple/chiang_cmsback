@@ -15,8 +15,8 @@ const sessionParser = require('express-session');
 const config = require('./config/config');
 const controller = require('./controller/index');
 const LogMiddleware = require('./middleware/LogMiddleware');
-const loginMiddleware = require('./middleware/loginMiddleware');
-require('./schedule');
+// const loginMiddleware = require('./middleware/loginMiddleware');
+// require('./schedule');
 
 // 解析cookie和session还有body
 app.use(cookieParser(config.cookieSign)); // 挂载中间件，可以理解为实例化

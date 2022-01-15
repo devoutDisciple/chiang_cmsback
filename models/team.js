@@ -1,69 +1,70 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('battle', {
+  return sequelize.define('team', {
     id: {
       autoIncrement: true,
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    title: {
+    uuid: {
       type: Sequelize.STRING(255),
       allowNull: true,
-      comment: "pk标题"
+      comment: "拼团的唯一标识"
     },
-    red_url: {
+    subject_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      comment: "课程id"
+    },
+    project_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      comment: "项目id"
+    },
+    order_ids: {
       type: Sequelize.STRING(255),
       allowNull: true,
-      comment: "红方图片url"
+      defaultValue: "[]",
+      comment: "对应的订单ids"
     },
-    red_name: {
+    user_ids: {
       type: Sequelize.STRING(255),
       allowNull: true,
-      comment: "红方名称"
+      defaultValue: "[]",
+      comment: "报名的用户ids"
     },
-    blue_url: {
-      type: Sequelize.STRING(255),
+    is_starter: {
+      type: Sequelize.INTEGER,
       allowNull: true,
-      comment: "蓝方图片url"
+      comment: "1-是 2-不是"
     },
-    blue_name: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      comment: "蓝方名称"
-    },
-    red_ticket: {
+    num: {
       type: Sequelize.INTEGER,
       allowNull: true,
       defaultValue: 0,
-      comment: "红方得票数"
+      comment: "已报名人员人数"
     },
-    blue_ticket: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-      comment: "蓝方得票数"
-    },
-    type: {
+    state: {
       type: Sequelize.INTEGER,
       allowNull: true,
       defaultValue: 1,
-      comment: "1-一天  3-三天  5-五天"
+      comment: "拼团状态 1-未开始 2-进行中 3-拼团成功 4-拼团超时失败 5-拼团人数不够失败 6-拼团失败已退款"
     },
     create_time: {
       type: Sequelize.DATE,
       allowNull: true,
       comment: "创建时间"
     },
-    dead_time: {
+    end_time: {
       type: Sequelize.DATE,
       allowNull: true,
-      comment: "截止时间"
+      comment: "结束时间"
     }
   }, {
     sequelize,
-    tableName: 'battle',
+    tableName: 'team',
     timestamps: false,
     indexes: [
       {

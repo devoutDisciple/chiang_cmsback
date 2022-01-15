@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 module.exports = {
 	copy: (obj) => {
 		const newObj = {};
@@ -26,5 +28,45 @@ module.exports = {
 			}
 		});
 		return obj;
+	},
+	countNumByTime(list) {
+		if (!list || list.length === 0) return [];
+		let now = moment(list[0].create_time).format('YYYY-MM-DD');
+		const timeData = [{ num: 0, time: now }];
+		let idx = 0;
+		list.forEach((item) => {
+			item.create_time = moment(item.create_time).format('YYYY-MM-DD');
+			if (item.create_time === now) {
+				timeData[idx].num++;
+			} else {
+				idx++;
+				timeData[idx] = {
+					num: 1,
+					time: item.create_time,
+				};
+				now = item.create_time;
+			}
+		});
+		return timeData;
+	},
+	countMoneyByTime(list) {
+		if (!list || list.length === 0) return [];
+		let now = moment(list[0].create_time).format('YYYY-MM-DD');
+		const timeData = [{ money: 0, time: now }];
+		let idx = 0;
+		list.forEach((item) => {
+			item.create_time = moment(item.create_time).format('YYYY-MM-DD');
+			if (item.create_time === now) {
+				timeData[idx].money = Number((Number(timeData[idx].money) + Number(item.money / 100)).toFixed(2));
+			} else {
+				idx++;
+				timeData[idx] = {
+					money: (item.money / 100).toFixed(2),
+					time: item.create_time,
+				};
+				now = item.create_time;
+			}
+		});
+		return timeData;
 	},
 };

@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('message', {
+  return sequelize.define('order', {
     id: {
       autoIncrement: true,
       type: Sequelize.INTEGER,
@@ -9,40 +9,53 @@ module.exports = (sequelize) => {
       primaryKey: true
     },
     user_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      comment: "发送人的id"
-    },
-    person_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      comment: "接收人的id"
-    },
-    username: {
       type: Sequelize.STRING(255),
       allowNull: true,
-      comment: "发送人的名称"
+      comment: "用户id"
     },
-    user_photo: {
+    open_id: {
+      type: Sequelize.STRING(255),
+      allowNull: true
+    },
+    team_uuid: {
       type: Sequelize.STRING(255),
       allowNull: true,
-      comment: "发送人的图片"
+      comment: "拼团的uuid"
     },
-    content: {
-      type: Sequelize.STRING(1000),
+    out_trade_no: {
+      type: Sequelize.STRING(255),
+      allowNull: false,
+      primaryKey: true,
+      comment: "内部订单号"
+    },
+    transaction_id: {
+      type: Sequelize.STRING(255),
       allowNull: true,
-      comment: "发送的内容"
+      comment: "微信支付单号"
+    },
+    subject_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      comment: "课程id"
+    },
+    project_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      comment: "班级id"
+    },
+    pay_state: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+      comment: "1-已支付 2-已退款 其他"
     },
     type: {
       type: Sequelize.INTEGER,
       allowNull: true,
-      defaultValue: 1,
-      comment: "1-文字 2-图片"
+      comment: "1-报名 2-组团"
     },
     create_time: {
       type: Sequelize.DATE,
-      allowNull: true,
-      comment: "创建时间"
+      allowNull: true
     },
     is_delete: {
       type: Sequelize.INTEGER,
@@ -52,7 +65,7 @@ module.exports = (sequelize) => {
     }
   }, {
     sequelize,
-    tableName: 'message',
+    tableName: 'order',
     timestamps: false,
     indexes: [
       {
@@ -61,6 +74,7 @@ module.exports = (sequelize) => {
         using: "BTREE",
         fields: [
           { name: "id" },
+          { name: "out_trade_no" },
         ]
       },
     ]

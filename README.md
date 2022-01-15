@@ -5,11 +5,10 @@
 参考命令：
 sequelize-auto -o "./models" -d sequelize_auto_test -h localhost -u my_username -p 5432 -x my_password -e postgres
 
-sequelize-auto -o "./models" -d omoschool -h localhost -u root -p 3306 -x zz941025 && node formatModels.js
+sequelize-auto -o "./models" -d chiang -h localhost -u root -p 3306 -x zz941025 && node formatModels.js
 
 项目中用到了shelljs以及commander...
 
 
-/status 使用express-status-monitor监控node运行状况
-
-
+更改 circle_feedback 变为 feedback
+增加type字段

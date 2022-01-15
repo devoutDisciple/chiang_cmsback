@@ -1,26 +1,28 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('user_attention_user', {
+  return sequelize.define('type', {
     id: {
       autoIncrement: true,
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    user_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      comment: "用户id"
+    name: {
+      type: Sequelize.STRING(255),
+      allowNull: false,
+      comment: "类别名称"
     },
-    other_id: {
+    sort: {
       type: Sequelize.INTEGER,
-      allowNull: true,
-      comment: "被关注人的id"
+      allowNull: false,
+      defaultValue: 1,
+      comment: "排序"
     },
     create_time: {
       type: Sequelize.DATE,
-      allowNull: true
+      allowNull: true,
+      comment: "创建时间"
     },
     is_delete: {
       type: Sequelize.INTEGER,
@@ -30,7 +32,7 @@ module.exports = (sequelize) => {
     }
   }, {
     sequelize,
-    tableName: 'user_attention_user',
+    tableName: 'type',
     timestamps: false,
     indexes: [
       {

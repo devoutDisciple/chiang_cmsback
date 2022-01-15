@@ -1,20 +1,30 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('view_record', {
+  return sequelize.define('detail', {
     id: {
       autoIncrement: true,
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    user_id: {
+    url: {
+      type: Sequelize.STRING(255),
+      allowNull: true
+    },
+    sub_id: {
       type: Sequelize.INTEGER,
       allowNull: true
     },
-    other_id: {
+    type: {
       type: Sequelize.INTEGER,
-      allowNull: true
+      allowNull: true,
+      comment: "1-课程详情 2-师资团队 3-报名须知"
+    },
+    sort: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      defaultValue: 1
     },
     create_time: {
       type: Sequelize.DATE,
@@ -28,7 +38,7 @@ module.exports = (sequelize) => {
     }
   }, {
     sequelize,
-    tableName: 'view_record',
+    tableName: 'detail',
     timestamps: false,
     indexes: [
       {

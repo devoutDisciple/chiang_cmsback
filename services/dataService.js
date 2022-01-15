@@ -1,40 +1,92 @@
+const Sequelize = require('sequelize');
 const moment = require('moment');
 const resultMessage = require('../util/resultMessage');
 const sequelize = require('../dataSource/MysqlPoolClass');
-const data = require('../models/data');
+const user = require('../models/user');
+const order = require('../models/order');
+const pay = require('../models/pay');
 const responseUtil = require('../util/responseUtil');
+const ObjectUtil = require('../util/ObjectUtil');
 
-const dataModel = data(sequelize);
+const orderModel = order(sequelize);
+const userModel = user(sequelize);
+const payModel = pay(sequelize);
+
+const Op = Sequelize.Op;
+const startTimeFormat = 'YYYY-MM-DD 00:00:00';
+const endTimeFormat = 'YYYY-MM-DD 23:59:59';
 
 module.exports = {
 	// 获取统计数据
 	getTotal: async (req, res) => {
 		try {
-			const datas = await dataModel.findAll({
-				order: [['create_time', 'DESC']],
-				limit: 1,
-				offset: 0,
-			});
-			let result = {};
-			if (datas && datas.length !== 0) {
-				result = responseUtil.renderFieldsObj(datas[0], [
-					'id',
-					'user_total',
-					'user_today',
-					'publish_total',
-					'publish_today',
-					'goods_total',
-					'goods_today',
-					'comment_total',
-					'comment_today',
-					'share_total',
-					'share_today',
-					'online_num',
-					'create_time',
-				]);
-				result.create_time = moment(result.create_time).format('YYYY-MM-DD HH:mm');
-			}
-			res.send(resultMessage.success(result));
+			const todayTime = moment(new Date()).format('YYYY-MM-DD 00:00') || 0;
+			// 用户总数
+			const totalUsers = (await userModel.count({ where: { is_delete: 1 } })) || 0;
+			// 今日新增用户数
+			const todayUsers =
+				(await userModel.count({
+					where: {
+						is_delete: 1,
+						create_time: {
+							[Op.gte]: todayTime,
+						},
+					},
+				})) || 0;
+			// 总报名数
+			const totalSignup = (await orderModel.count({ where: { type: 1, is_delete: 1 } })) || 0;
+			// 今日报名人数
+			const todaySignup =
+				(await orderModel.count({
+					where: {
+						type: 1,
+						is_delete: 1,
+						create_time: {
+							[Op.gte]: todayTime,
+						},
+					},
+				})) || 0;
+			// 总组团人数
+			const totalTeams = (await orderModel.count({ where: { type: 2, is_delete: 1 } })) || 0;
+			// 今日报名人数
+			const todayTeams =
+				(await orderModel.count({
+					where: {
+						type: 2,
+						is_delete: 1,
+						create_time: {
+							[Op.gte]: todayTime,
+						},
+					},
+				})) || 0;
+			// 总收入
+			let totalMoney = (await payModel.sum('money', { where: { pay_type: 1, is_delete: 1 } })) || 0;
+			if (totalMoney) totalMoney = (totalMoney / 100).toFixed(2);
+			// 今天收入
+			let todayMoney =
+				(await payModel.sum('money', {
+					where: {
+						pay_type: 1,
+						is_delete: 1,
+						create_time: {
+							[Op.gte]: todayTime,
+						},
+					},
+				})) || 0;
+			if (todayMoney) todayMoney = (todayMoney / 100).toFixed(2);
+
+			res.send(
+				resultMessage.success({
+					totalUsers,
+					todayUsers,
+					totalSignup,
+					todaySignup,
+					totalTeams,
+					todayTeams,
+					totalMoney,
+					todayMoney,
+				}),
+			);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error([]));
@@ -44,17 +96,18 @@ module.exports = {
 	// 获取用户增长记录数据
 	getUserNumData: async (req, res) => {
 		try {
-			const datas = await dataModel.findAll({
+			const { startTime, endTime } = req.query;
+			const users = await userModel.findAll({
 				order: [['create_time', 'ASC']],
-				attributes: ['id', 'user_total', 'create_time'],
+				attributes: ['id', 'create_time'],
+				where: {
+					create_time: {
+						[Op.gte]: moment(startTime).format(startTimeFormat),
+						[Op.lte]: moment(endTime).format(endTimeFormat),
+					},
+				},
 			});
-			let result = {};
-			if (datas && datas.length !== 0) {
-				result = responseUtil.renderFieldsAll(datas, ['id', 'user_total', 'create_time']);
-				result.forEach((item) => {
-					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm');
-				});
-			}
+			const result = ObjectUtil.countNumByTime(responseUtil.renderFieldsAll(users, ['id', 'create_time']));
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);
@@ -62,20 +115,22 @@ module.exports = {
 		}
 	},
 
-	// 获取用户增长记录数据
-	getPublishNumData: async (req, res) => {
+	// 获取收入曲线
+	getSalesData: async (req, res) => {
 		try {
-			const datas = await dataModel.findAll({
+			const { startTime, endTime } = req.query;
+			const users = await payModel.findAll({
 				order: [['create_time', 'ASC']],
-				attributes: ['id', 'publish_total', 'create_time'],
+				attributes: ['id', 'pay_type', 'money', 'create_time'],
+				where: {
+					create_time: {
+						[Op.gte]: moment(startTime).format(startTimeFormat),
+						[Op.lte]: moment(endTime).format(endTimeFormat),
+					},
+					pay_type: 1,
+				},
 			});
-			let result = {};
-			if (datas && datas.length !== 0) {
-				result = responseUtil.renderFieldsAll(datas, ['id', 'publish_total', 'create_time']);
-				result.forEach((item) => {
-					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm');
-				});
-			}
+			const result = ObjectUtil.countMoneyByTime(responseUtil.renderFieldsAll(users, ['id', 'pay_type', 'money', 'create_time']));
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);
@@ -83,20 +138,23 @@ module.exports = {
 		}
 	},
 
-	// 点赞
-	getGoodsNumData: async (req, res) => {
+	// 报名人数
+	getSignupData: async (req, res) => {
 		try {
-			const datas = await dataModel.findAll({
+			const { startTime, endTime } = req.query;
+			const datas = await orderModel.findAll({
 				order: [['create_time', 'ASC']],
-				attributes: ['id', 'goods_total', 'create_time'],
+				attributes: ['id', 'type', 'pay_state'],
+				where: {
+					create_time: {
+						[Op.gte]: moment(startTime).format(startTimeFormat),
+						[Op.lte]: moment(endTime).format(endTimeFormat),
+					},
+					type: 1,
+					is_delete: 1,
+				},
 			});
-			let result = {};
-			if (datas && datas.length !== 0) {
-				result = responseUtil.renderFieldsAll(datas, ['id', 'goods_total', 'create_time']);
-				result.forEach((item) => {
-					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm');
-				});
-			}
+			const result = ObjectUtil.countNumByTime(responseUtil.renderFieldsAll(datas, ['id', 'type', 'pay_state']));
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);
@@ -104,20 +162,23 @@ module.exports = {
 		}
 	},
 
-	// 评论
-	getCommentsNumData: async (req, res) => {
+	// 组团人数
+	getTeamData: async (req, res) => {
 		try {
-			const datas = await dataModel.findAll({
+			const { startTime, endTime } = req.query;
+			const datas = await orderModel.findAll({
 				order: [['create_time', 'ASC']],
-				attributes: ['id', 'comment_total', 'create_time'],
+				attributes: ['id', 'type', 'pay_state'],
+				where: {
+					create_time: {
+						[Op.gte]: moment(startTime).format(startTimeFormat),
+						[Op.lte]: moment(endTime).format(endTimeFormat),
+					},
+					type: 2,
+					is_delete: 1,
+				},
 			});
-			let result = {};
-			if (datas && datas.length !== 0) {
-				result = responseUtil.renderFieldsAll(datas, ['id', 'comment_total', 'create_time']);
-				result.forEach((item) => {
-					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm');
-				});
-			}
+			const result = ObjectUtil.countNumByTime(responseUtil.renderFieldsAll(datas, ['id', 'type', 'pay_state']));
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);

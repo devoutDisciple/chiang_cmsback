@@ -1,33 +1,30 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('battle_record', {
+  return sequelize.define('swiper', {
     id: {
       autoIncrement: true,
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    user_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true
-    },
-    content_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true
-    },
-    type: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      comment: "1-选择红色方 2-选择蓝色方"
+    url: {
+      type: Sequelize.STRING(255),
+      allowNull: false
     },
     create_time: {
       type: Sequelize.DATE,
-      allowNull: true
+      allowNull: false
+    },
+    is_delete: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+      comment: "1-存在 2-删除"
     }
   }, {
     sequelize,
-    tableName: 'battle_record',
+    tableName: 'swiper',
     timestamps: false,
     indexes: [
       {

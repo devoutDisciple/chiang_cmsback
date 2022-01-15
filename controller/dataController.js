@@ -13,19 +13,19 @@ router.get('/userNumData', (req, res) => {
 	dataService.getUserNumData(req, res);
 });
 
-// 获取发布内容增长数据
-router.get('/publishNumData', (req, res) => {
-	dataService.getPublishNumData(req, res);
+// 获取收入增长数据
+router.get('/salesMoneyData', (req, res) => {
+	dataService.getSalesData(req, res);
 });
 
-// 获取评论增长数据
-router.get('/commentsNumData', (req, res) => {
-	dataService.getCommentsNumData(req, res);
+// 获取报名增长数据
+router.get('/signupData', (req, res) => {
+	dataService.getSignupData(req, res);
 });
 
 // 获取点赞增长数据
-router.get('/goodsNumData', (req, res) => {
-	dataService.getGoodsNumData(req, res);
+router.get('/teamData', (req, res) => {
+	dataService.getTeamData(req, res);
 });
 
 module.exports = router;

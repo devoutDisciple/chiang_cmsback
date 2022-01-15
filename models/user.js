@@ -52,63 +52,16 @@ module.exports = (sequelize) => {
       allowNull: true,
       comment: "地址"
     },
-    school: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      comment: "学校"
-    },
-    level: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      defaultValue: "高一",
-      comment: "班级"
-    },
     sign: {
       type: Sequelize.STRING(255),
       allowNull: true,
       comment: "个性签名"
-    },
-    goods: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-      comment: "点赞量"
-    },
-    fans: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-      comment: "粉丝数量"
-    },
-    fellow: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-      comment: "关注人数"
-    },
-    publish: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-      comment: "发布数量"
     },
     integral: {
       type: Sequelize.STRING(255),
       allowNull: true,
       defaultValue: "0",
       comment: "积分"
-    },
-    type: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      defaultValue: "1",
-      comment: "1-微信用户 2-qq用户"
-    },
-    identity: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 1,
-      comment: "1-学生 2-学校老师 3-机构老师"
     },
     create_time: {
       type: Sequelize.DATE,

@@ -1,84 +1,96 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
-  return sequelize.define('content', {
+  return sequelize.define('subject', {
     id: {
       autoIncrement: true,
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    user_id: {
+    project_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      comment: "所属的课程的id"
+    },
+    title: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+      comment: "title"
+    },
+    url: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+      comment: "宣传图片"
+    },
+    start_time: {
+      type: Sequelize.DATE,
+      allowNull: false,
+      comment: "开始时间"
+    },
+    end_time: {
+      type: Sequelize.DATE,
+      allowNull: false,
+      comment: "结束时间"
+    },
+    teacher_ids: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+      defaultValue: "[]",
+      comment: "授课老师的id"
+    },
+    price: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+      defaultValue: "0",
+      comment: "总价"
+    },
+    apply_price: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+      defaultValue: "0",
+      comment: "报名价格"
+    },
+    cluster_price: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+      defaultValue: "0",
+      comment: "组团价格"
+    },
+    total_person: {
       type: Sequelize.INTEGER,
       allowNull: true,
-      comment: "发布人id"
+      defaultValue: 0,
+      comment: "总报名人数"
     },
-    circle_ids: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      defaultValue: "[]",
-      comment: "圈子id"
-    },
-    circle_names: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      defaultValue: "[]",
-      comment: "圈子的name"
-    },
-    topic_ids: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      defaultValue: "[]",
-      comment: "所属话题id"
-    },
-    topic_names: {
-      type: Sequelize.STRING(255),
-      allowNull: true,
-      defaultValue: "[]",
-      comment: "话题的name"
-    },
-    other_id: {
+    apply_num: {
       type: Sequelize.INTEGER,
       allowNull: true,
-      comment: "关联的id"
+      defaultValue: 0,
+      comment: "报名人数"
     },
-    type: {
+    cluster_num: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      comment: "组团人数"
+    },
+    limit_num: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      comment: "限制人数"
+    },
+    state: {
       type: Sequelize.INTEGER,
       allowNull: true,
       defaultValue: 1,
-      comment: "1-帖子 2-博客 3-投票 4-pk 5-视频"
+      comment: "1-未开始 2-进行中 3-已结束"
     },
-    goods: {
+    sort: {
       type: Sequelize.INTEGER,
       allowNull: true,
-      defaultValue: 0,
-      comment: "点赞"
-    },
-    comment: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-      comment: "评论"
-    },
-    share: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-      comment: "转发"
-    },
-    hot: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      defaultValue: 1,
-      comment: "热度"
-    },
-    create_time: {
-      type: Sequelize.DATE,
-      allowNull: true
-    },
-    update_time: {
-      type: Sequelize.DATE,
-      allowNull: true
+      defaultValue: 1
     },
     is_delete: {
       type: Sequelize.INTEGER,
@@ -88,7 +100,7 @@ module.exports = (sequelize) => {
     }
   }, {
     sequelize,
-    tableName: 'content',
+    tableName: 'subject',
     timestamps: false,
     indexes: [
       {
