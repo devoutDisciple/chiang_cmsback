@@ -2,17 +2,18 @@ const Sequelize = require('sequelize');
 const moment = require('moment');
 const config = require('../config/config');
 const sequelize = require('../dataSource/MysqlPoolClass');
-const plate = require('../models/plate');
+const swiper = require('../models/swiper');
 const resultMessage = require('../util/resultMessage');
 const responseUtil = require('../util/responseUtil');
 
 const Op = Sequelize.Op;
-const plateModal = plate(sequelize);
+const swiperModal = swiper(sequelize);
 const pagesize = 10;
+const commonFields = ['id', 'url', 'sort'];
 
 module.exports = {
 	// 分页获取板块数据
-	getPlatesByPage: async (req, res) => {
+	getAllSwiper: async (req, res) => {
 		try {
 			const { current = 1, name } = req.query;
 			const condition = { is_delete: 1 };
@@ -21,9 +22,8 @@ module.exports = {
 					[Op.like]: `%${name}%`,
 				};
 			}
-			const commonFields = ['id', 'name', 'url', 'type', 'link', 'sort', 'hot'];
 			const offset = Number((current - 1) * pagesize);
-			const plates = await plateModal.findAndCountAll({
+			const swipers = await swiperModal.findAndCountAll({
 				where: condition,
 				attributes: commonFields,
 				order: [['sort', 'DESC']],
@@ -34,11 +34,11 @@ module.exports = {
 				count: 0,
 				list: [],
 			};
-			if (plates && plates.rows && plates.rows.length !== 0) {
-				result.count = plates.count;
-				result.list = responseUtil.renderFieldsAll(plates.rows, commonFields);
+			if (swipers && swipers.rows && swipers.rows.length !== 0) {
+				result.count = swipers.count;
+				result.list = responseUtil.renderFieldsAll(swipers.rows, commonFields);
 				result.list.forEach((item) => {
-					item.url = config.preUrl.baseUrl + item.url;
+					item.url = config.preUrl.swiperUrl + item.url;
 				});
 			}
 			res.send(resultMessage.success(result));
@@ -48,46 +48,11 @@ module.exports = {
 		}
 	},
 
-	// 分页获取板块数据
-	getAllPlates: async (req, res) => {
+	// 新增轮播图
+	addswiper: async (req, res) => {
 		try {
-			const commonFields = ['id', 'name'];
-			const plates = await plateModal.findAll({
-				where: { is_delete: 1 },
-				attributes: commonFields,
-				order: [['sort', 'DESC']],
-			});
-			const result = responseUtil.renderFieldsAll(plates, ['id', 'name']);
-			res.send(resultMessage.success(result));
-		} catch (error) {
-			console.log(error);
-			res.send(resultMessage.error());
-		}
-	},
-
-	// 删除模块
-	deleteById: async (req, res) => {
-		try {
-			const { plate_id } = req.body;
-			if (!plate_id) return res.send(resultMessage.error('无效模块'));
-			await plateModal.destroy({
-				where: {
-					id: plate_id,
-				},
-			});
-			res.send(resultMessage.success('success'));
-		} catch (error) {
-			console.log(error);
-			res.send(resultMessage.error());
-		}
-	},
-
-	// 新增模块
-	addPlate: async (req, res) => {
-		try {
-			const { name, sort, filename } = req.body;
-			await plateModal.create({
-				name,
+			const { sort, filename } = req.body;
+			await swiperModal.create({
 				url: filename,
 				sort,
 				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
@@ -99,19 +64,38 @@ module.exports = {
 		}
 	},
 
-	// 编辑模块
-	editPlate: async (req, res) => {
+	// 删除轮播图
+	deleteById: async (req, res) => {
 		try {
-			const { id, name, sort, filename } = req.body;
+			const { swiper_id } = req.body;
+			if (!swiper_id) return res.send(resultMessage.error('系统错误'));
+			await swiperModal.update(
+				{ is_delete: 2 },
+				{
+					where: {
+						id: swiper_id,
+					},
+				},
+			);
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			res.send(resultMessage.error());
+		}
+	},
+
+	// 编辑轮播图
+	editSwiper: async (req, res) => {
+		try {
+			const { id, sort, filename } = req.body;
 			const data = {
-				name,
 				sort,
 				update_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 			};
 			if (filename) {
 				data.url = filename;
 			}
-			await plateModal.update(data, { where: { id } });
+			await swiperModal.update(data, { where: { id } });
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);

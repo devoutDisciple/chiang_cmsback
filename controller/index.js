@@ -1,8 +1,8 @@
 // const accountController = require('./accountController');
 const dataController = require('./dataController');
-// const userController = require('./userController');
-// const plateController = require('./plateController');
-// const circleController = require('./circleController');
+const userController = require('./userController');
+const swiperController = require('./swiperController');
+const projectController = require('./projectController');
 // const addressController = require('./addressController');
 // const contentController = require('./contentController');
 // const topicController = require('./topicController');
@@ -15,12 +15,12 @@ const router = (app) => {
 	// app.use('/account', accountController);
 	// 数据汇总
 	app.use('/data', dataController);
-	// // 用户相关
-	// app.use('/user', userController);
-	// // 板块相关
-	// app.use('/plate', plateController);
-	// // 圈子相关
-	// app.use('/circle', circleController);
+	// 用户相关
+	app.use('/user', userController);
+	// 板块相关
+	app.use('/swiper', swiperController);
+	// 课程类别管理
+	app.use('/project', projectController);
 	// // 地址相关
 	// app.use('/address', addressController);
 	// // 话题相关
