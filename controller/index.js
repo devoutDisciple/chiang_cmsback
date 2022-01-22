@@ -3,7 +3,7 @@ const dataController = require('./dataController');
 const userController = require('./userController');
 const swiperController = require('./swiperController');
 const projectController = require('./projectController');
-// const addressController = require('./addressController');
+const subjectController = require('./subjectController');
 // const contentController = require('./contentController');
 // const topicController = require('./topicController');
 // const feedbackController = require('./feedbackController');
@@ -21,8 +21,8 @@ const router = (app) => {
 	app.use('/swiper', swiperController);
 	// 课程类别管理
 	app.use('/project', projectController);
-	// // 地址相关
-	// app.use('/address', addressController);
+	// 课程相关
+	app.use('/subject', subjectController);
 	// // 话题相关
 	// app.use('/topic', topicController);
 	// // 内容相关

@@ -61,6 +61,12 @@ module.exports = (sequelize) => {
       type: Sequelize.DATE,
       allowNull: true,
       comment: "结束时间"
+    },
+    is_delete: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      defaultValue: 1,
+      comment: "1-存在 2-删除"
     }
   }, {
     sequelize,

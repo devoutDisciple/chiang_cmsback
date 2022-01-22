@@ -18,4 +18,9 @@ router.post('/deleteById', (req, res) => {
 	projectService.deleteById(req, res);
 });
 
+// 根据type allPorjectByType
+router.get('/allPorjectByType', (req, res) => {
+	projectService.getAllPorjectByType(req, res);
+});
+
 module.exports = router;

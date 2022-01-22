@@ -72,4 +72,20 @@ module.exports = {
 			res.send(resultMessage.error());
 		}
 	},
+
+	// 根据type获取所有课程类别  getAllPorjectByType
+	getAllPorjectByType: async (req, res) => {
+		try {
+			const { typeId } = req.query;
+			const projects = await projectModal.findAll({
+				where: { type_id: typeId, is_delete: 1 },
+				order: [['sort', 'DESC']],
+			});
+			const result = responseUtil.renderFieldsAll(projects, ['id', 'name']);
+			res.send(resultMessage.success(result));
+		} catch (error) {
+			console.log(error);
+			res.send(resultMessage.error());
+		}
+	},
 };
