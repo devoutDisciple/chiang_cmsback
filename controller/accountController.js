@@ -5,7 +5,6 @@ const accountService = require('../services/accountService');
 
 // 判断用户是否登录
 router.get('/isLogin', (req, res) => {
-	console.log(111);
 	accountService.isLogin(req, res);
 });
 

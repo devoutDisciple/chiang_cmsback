@@ -15,7 +15,7 @@ const sessionParser = require('express-session');
 const config = require('./config/config');
 const controller = require('./controller/index');
 const LogMiddleware = require('./middleware/LogMiddleware');
-// const loginMiddleware = require('./middleware/loginMiddleware');
+const loginMiddleware = require('./middleware/loginMiddleware');
 // require('./schedule');
 
 // 解析cookie和session还有body
@@ -63,7 +63,7 @@ app.all('*', (req, res, next) => {
 });
 
 // 判断用户是否登录
-// app.use(loginMiddleware);
+app.use(loginMiddleware);
 
 // 路由 controller层
 controller(app);

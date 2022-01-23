@@ -5,9 +5,12 @@ const resultMessage = require('../util/resultMessage');
 const order = require('../models/order');
 const user = require('../models/user');
 const project = require('../models/project');
+const team = require('../models/team');
+
 const subject = require('../models/subject');
 const responseUtil = require('../util/responseUtil');
 
+const teamModal = team(sequelize);
 const userModal = user(sequelize);
 const projectModal = project(sequelize);
 const subjectModal = subject(sequelize);
@@ -19,6 +22,7 @@ const Op = Sequelize.Op;
 orderModal.belongsTo(userModal, { foreignKey: 'user_id', targetKey: 'id', as: 'userDetail' });
 orderModal.belongsTo(projectModal, { foreignKey: 'project_id', targetKey: 'id', as: 'projectDetail' });
 orderModal.belongsTo(subjectModal, { foreignKey: 'subject_id', targetKey: 'id', as: 'subjectDetail' });
+orderModal.belongsTo(teamModal, { foreignKey: 'team_uuid', targetKey: 'uuid', as: 'teamDetail' });
 
 const contentCommonFields = ['id', 'user_id', 'team_uuid', 'subject_id', 'project_id', 'pay_state', 'type', 'create_time'];
 
@@ -57,6 +61,11 @@ module.exports = {
 						as: 'subjectDetail',
 						attributes: ['id', 'title'],
 					},
+					{
+						model: teamModal,
+						as: 'teamDetail',
+						attributes: ['id', 'order_ids', 'user_ids', 'start_user_id', 'num', 'state'],
+					},
 				],
 			});
 			const result = {
@@ -70,6 +79,7 @@ module.exports = {
 					'userDetail',
 					'projectDetail',
 					'subjectDetail',
+					'teamDetail',
 				]);
 				result.list.forEach((item) => {
 					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');

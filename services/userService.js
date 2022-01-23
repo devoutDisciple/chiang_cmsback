@@ -115,49 +115,4 @@ module.exports = {
 			res.send(resultMessage.error());
 		}
 	},
-
-	// 获取个人统计信息， 收获多少赞，发布，关注，粉丝
-	// userData: async (req, res) => {
-	// 	try {
-	// 		const { user_id } = req.query;
-	// 		if (!user_id) return res.send(resultMessage.error('请先登录'));
-	// 		// 获取多少发布
-	// 		const publishNum = await contentModal.count({ where: { user_id, is_delete: 1 } });
-	// 		// 获取多少粉丝
-	// 		const fansNum = await userAttentionModal.count({ where: { other_id: user_id, is_delete: 1 } });
-	// 		// 赞过多少帖子
-	// 		const postGoodsNum = await goodsRecordModal.count({
-	// 			where: { user_id, type: 1 },
-	// 			include: [
-	// 				{
-	// 					model: contentModal,
-	// 					as: 'contentDetail',
-	// 					where: {
-	// 						user_id: {
-	// 							[Op.not]: user_id,
-	// 						},
-	// 					},
-	// 				},
-	// 			],
-	// 		});
-	// 		// 赞过多少
-	// 		const commentsNum = await goodsRecordModal.count({
-	// 			where: { user_id, type: [2, 3] },
-	// 		});
-	// 		const goodsNum = Number(Number(postGoodsNum) + Number(commentsNum)).toFixed(0);
-	// 		// 获取多少关注
-	// 		const attentionNum = await userAttentionModal.count({ where: { user_id, is_delete: 1 } });
-	// 		res.send(
-	// 			resultMessage.success({
-	// 				publishNum,
-	// 				fansNum,
-	// 				goodsNum,
-	// 				attentionNum,
-	// 			}),
-	// 		);
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 		res.send(resultMessage.error());
-	// 	}
-	// },
 };
