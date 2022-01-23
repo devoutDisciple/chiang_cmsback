@@ -18,6 +18,11 @@ module.exports = (sequelize) => {
       defaultValue: "photo.png",
       comment: "头像"
     },
+    create_time: {
+      type: Sequelize.DATE,
+      allowNull: true,
+      comment: "创建时间"
+    },
     is_delete: {
       type: Sequelize.INTEGER,
       allowNull: true,

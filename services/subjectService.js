@@ -4,11 +4,15 @@ const sequelize = require('../dataSource/MysqlPoolClass');
 const resultMessage = require('../util/resultMessage');
 const subject = require('../models/subject');
 const detail = require('../models/detail');
+const project = require('../models/project');
 const responseUtil = require('../util/responseUtil');
 const config = require('../config/config');
 
+const projectModal = project(sequelize);
 const subjectModal = subject(sequelize);
 const detailModal = detail(sequelize);
+
+subjectModal.belongsTo(projectModal, { foreignKey: 'project_id', targetKey: 'id', as: 'projectDetail' });
 
 const pagesize = 10;
 // const Op = Sequelize.Op;
@@ -45,12 +49,20 @@ module.exports = {
 				condition.project_id = projectid;
 			}
 			const offset = Number((current - 1) * pagesize);
+			console.log(condition, 1111);
 			const contents = await subjectModal.findAndCountAll({
 				where: condition,
 				order,
 				attributes: contentCommonFields,
 				limit: pagesize,
 				offset,
+				include: [
+					{
+						model: projectModal,
+						as: 'projectDetail',
+						attributes: ['id', 'name', 'type_id'],
+					},
+				],
 			});
 			const result = {
 				count: 0,
@@ -58,13 +70,14 @@ module.exports = {
 			};
 			if (contents && contents.rows && contents.rows.length !== 0) {
 				result.count = contents.count;
-				result.list = responseUtil.renderFieldsAll(contents.rows, [...contentCommonFields, 'userDetail']);
+				result.list = responseUtil.renderFieldsAll(contents.rows, [...contentCommonFields, 'userDetail', 'projectDetail']);
 				result.list.forEach((item) => {
 					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
 					item.start_time = moment(item.start_time).format('YYYY.MM.DD');
 					item.end_time = moment(item.end_time).format('YYYY.MM.DD');
 				});
 			}
+			console.log(result, 2222);
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);

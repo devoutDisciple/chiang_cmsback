@@ -1,17 +1,18 @@
 const express = require('express');
 
-const router = express.Router();
 const multer = require('multer');
+
+const router = express.Router();
 const config = require('../config/config');
 const ObjectUtil = require('../util/ObjectUtil');
-const subjectService = require('../services/subjectService');
+const teacherService = require('../services/teacherService');
 
 let filename = '';
 // 使用硬盘存储模式设置存放接收到的文件的路径以及文件名
 const storage = multer.diskStorage({
 	destination(req, file, cb) {
 		// 接收到文件后输出的保存路径（若不存在则需要创建）
-		cb(null, config.subjectPath);
+		cb(null, config.photoPath);
 	},
 	filename(req, file, cb) {
 		// 将保存文件名设置为 随机字符串 + 时间戳名，比如 JFSDJF323423-1342342323.png
@@ -19,40 +20,26 @@ const storage = multer.diskStorage({
 		cb(null, filename);
 	},
 });
-const upload = multer({ dest: config.subjectPath, storage });
+const upload = multer({ dest: config.photoPath, storage });
 
-router.get('/allSubjectByContions', (req, res) => {
-	subjectService.getAllSubjectsByContions(req, res);
+// 获取所有老师
+router.get('/allTeacher', (req, res) => {
+	teacherService.getAllTeacher(req, res);
 });
 
-// 新增
+// 删除老师
+router.post('/deleteById', (req, res) => {
+	teacherService.deleteById(req, res);
+});
+
+// 新增老师
 router.post('/add', (req, res) => {
-	subjectService.addSubject(req, res);
-});
-
-// 获取详情
-router.get('/detailById', (req, res) => {
-	subjectService.getDetailById(req, res);
-});
-
-// 删除
-router.post('/deleteById', (req, res) => {
-	subjectService.deleteById(req, res);
-});
-
-// 删除
-router.post('/deleteById', (req, res) => {
-	subjectService.deleteById(req, res);
+	teacherService.addTeacher(req, res);
 });
 
 // 上传图片
 router.post('/upload', upload.single('file'), (req, res) => {
-	subjectService.uploadFile(req, res, filename);
-});
-
-// 修改详情图片
-router.post('/updateDetailImgs', (req, res) => {
-	subjectService.updateDetailImgs(req, res);
+	teacherService.uploadFile(req, res, filename);
 });
 
 module.exports = router;

@@ -4,8 +4,8 @@ const userController = require('./userController');
 const swiperController = require('./swiperController');
 const projectController = require('./projectController');
 const subjectController = require('./subjectController');
-// const contentController = require('./contentController');
-// const topicController = require('./topicController');
+const teacherController = require('./teacherController');
+const orderController = require('./orderController');
 // const feedbackController = require('./feedbackController');
 // const replyController = require('./replyController');
 // const goodsController = require('./goodsController');
@@ -23,8 +23,10 @@ const router = (app) => {
 	app.use('/project', projectController);
 	// 课程相关
 	app.use('/subject', subjectController);
-	// // 话题相关
-	// app.use('/topic', topicController);
+	// 老师相关
+	app.use('/teacher', teacherController);
+	// 话题相关
+	app.use('/order', orderController);
 	// // 内容相关
 	// app.use('/content', contentController);
 	// // 评论相关

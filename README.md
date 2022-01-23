@@ -10,5 +10,5 @@ sequelize-auto -o "./models" -d chiang -h localhost -u root -p 3306 -x zz941025 
 项目中用到了shelljs以及commander...
 
 
-更改 circle_feedback 变为 feedback
-增加type字段
+改变的表
+teacher
