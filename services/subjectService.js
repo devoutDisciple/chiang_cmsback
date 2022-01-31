@@ -49,7 +49,6 @@ module.exports = {
 				condition.project_id = projectid;
 			}
 			const offset = Number((current - 1) * pagesize);
-			console.log(condition, 1111);
 			const contents = await subjectModal.findAndCountAll({
 				where: condition,
 				order,
@@ -98,6 +97,7 @@ module.exports = {
 				project_id: data.projectid,
 				start_time: data.start_time,
 				title: data.title,
+				teacher_ids: JSON.stringify(data.teacher_ids),
 				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 			};
 			const result = await subjectModal.create(prams);

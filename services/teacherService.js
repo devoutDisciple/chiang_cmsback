@@ -21,7 +21,6 @@ module.exports = {
 				condition.project_id = projectid;
 			}
 			const offset = Number((current - 1) * pagesize);
-			console.log(condition, 1111);
 			const contents = await teacherModal.findAndCountAll({
 				where: condition,
 				order,
@@ -40,6 +39,24 @@ module.exports = {
 					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
 				});
 			}
+			res.send(resultMessage.success(result));
+		} catch (error) {
+			console.log(error);
+			res.send(resultMessage.error());
+		}
+	},
+
+	// 获取所有老师(不分页)
+	getAllTeachers: async (req, res) => {
+		try {
+			const condition = { is_delete: 1 };
+			const order = [['create_time', 'DESC']];
+			const teachers = await teacherModal.findAll({
+				where: condition,
+				order,
+				attributes: contentCommonFields,
+			});
+			const result = responseUtil.renderFieldsAll(teachers, contentCommonFields);
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);

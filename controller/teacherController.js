@@ -27,6 +27,11 @@ router.get('/allTeacher', (req, res) => {
 	teacherService.getAllTeacher(req, res);
 });
 
+// 获取所有老师,不分页
+router.get('/allTeachers', (req, res) => {
+	teacherService.getAllTeachers(req, res);
+});
+
 // 删除老师
 router.post('/deleteById', (req, res) => {
 	teacherService.deleteById(req, res);
