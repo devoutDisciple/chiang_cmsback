@@ -32,6 +32,7 @@ const contentCommonFields = [
 	'cluster_num',
 	'limit_num',
 	'state',
+	'tags',
 	'sort',
 	'create_time',
 ];
@@ -102,6 +103,41 @@ module.exports = {
 			};
 			const result = await subjectModal.create(prams);
 			await detailModal.create({ sub_id: result.id, create_time: moment().format('YYYY-MM-DD HH:mm:ss') });
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			res.send(resultMessage.error());
+		}
+	},
+
+	// 编辑课程
+	editSubject: async (req, res) => {
+		try {
+			const data = req.body;
+			const params = {
+				apply_price: data.apply_price,
+				cluster_price: data.cluster_price,
+				end_time: data.end_time,
+				limit_num: data.limit_num,
+				price: data.price,
+				project_id: data.projectid,
+				start_time: data.start_time,
+				title: data.title,
+				teacher_ids: JSON.stringify(data.teacher_ids),
+				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+			};
+			await subjectModal.update(params, { where: { id: data.id } });
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			res.send(resultMessage.error());
+		}
+	},
+
+	addTags: async (req, res) => {
+		try {
+			const { id, tags } = req.body;
+			await subjectModal.update({ tags: JSON.stringify(tags) }, { where: { id } });
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);

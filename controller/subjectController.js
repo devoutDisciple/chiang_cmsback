@@ -30,6 +30,16 @@ router.post('/add', (req, res) => {
 	subjectService.addSubject(req, res);
 });
 
+// 编辑
+router.post('/edit', (req, res) => {
+	subjectService.editSubject(req, res);
+});
+
+// 编辑tags
+router.post('/addTags', (req, res) => {
+	subjectService.addTags(req, res);
+});
+
 // 获取详情
 router.get('/detailById', (req, res) => {
 	subjectService.getDetailById(req, res);
