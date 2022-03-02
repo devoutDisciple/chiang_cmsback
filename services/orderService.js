@@ -24,7 +24,21 @@ orderModal.belongsTo(projectModal, { foreignKey: 'project_id', targetKey: 'id', 
 orderModal.belongsTo(subjectModal, { foreignKey: 'subject_id', targetKey: 'id', as: 'subjectDetail' });
 orderModal.belongsTo(teamModal, { foreignKey: 'team_uuid', targetKey: 'uuid', as: 'teamDetail' });
 
-const contentCommonFields = ['id', 'user_id', 'team_uuid', 'subject_id', 'project_id', 'pay_state', 'type', 'create_time'];
+const contentCommonFields = [
+	'id',
+	'user_id',
+	'team_uuid',
+	'subject_id',
+	'project_id',
+	'pay_state',
+	'type',
+	'english',
+	'math',
+	'sex',
+	'time',
+	'name',
+	'create_time',
+];
 
 module.exports = {
 	// 分页获取内容
@@ -83,6 +97,7 @@ module.exports = {
 				]);
 				result.list.forEach((item) => {
 					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
+					item.time = item.time ? moment(item.time).format('YYYY-MM-DD') : '';
 				});
 			}
 			res.send(resultMessage.success(result));
