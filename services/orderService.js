@@ -15,6 +15,7 @@ const userModal = user(sequelize);
 const projectModal = project(sequelize);
 const subjectModal = subject(sequelize);
 const orderModal = order(sequelize);
+const { filterTeamState } = require('../constant/constant');
 
 const pagesize = 10;
 const Op = Sequelize.Op;
@@ -98,6 +99,17 @@ module.exports = {
 				result.list.forEach((item) => {
 					item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
 					item.time = item.time ? moment(item.time).format('YYYY-MM-DD') : '';
+					if (item.teamDetail) {
+						item.teamDetail = responseUtil.renderFieldsObj(item.teamDetail, [
+							'id',
+							'num',
+							'order_ids',
+							'start_user_id',
+							'state',
+							'user_ids',
+						]);
+						item.teamDetail.teamState = filterTeamState(item.teamDetail.state);
+					}
 				});
 			}
 			res.send(resultMessage.success(result));
